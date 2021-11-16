@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+        <link rel="stylesheet" href="kaktus1.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script>
+		window.onload = function () {
+
+  var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+  
+  var categories;         
+  var word ;              
+  var guess ;             
+  var geusses = [ ];      
+  var lives ;             
+  var counter ;           
+  var space;             
+
+  var showLives = document.getElementById("mylives");
+  var showCatagory = document.getElementById("scatagory");
+
+  var buttons = function () {
+    myButtons = document.getElementById('buttons');
+    letters = document.createElement('ul');
+
+    for (var i = 0; i < alphabet.length; i++) {
+      letters.id = 'alphabet';
+      list = document.createElement('li');
+      list.id = 'letter';
+      list.innerHTML = alphabet[i];
+      check();
+      myButtons.appendChild(letters);
+      letters.appendChild(list);
+    }
+  }
+
+   result = function () {
+    wordHolder = document.getElementById('hold');
+    correct = document.createElement('ul');
+
+    for (var i = 0; i < word.length; i++) {
+      correct.setAttribute('id', 'my-word');
+      guess = document.createElement('li');
+      guess.setAttribute('class', 'guess');
+      if (word[i] === "-") {
+        guess.innerHTML = "-";
+        space = 1;
+      } else {
+        guess.innerHTML = "_";
+      }
+
+      geusses.push(guess);
+      wordHolder.appendChild(correct);
+      correct.appendChild(guess);
+    }
+  }
+  
+  // Pokazuke ile żyć jest albo zastało, jeżeli żyć 0 = gra przegrana, w innych sytuacjach - gra wygrana
+   comments = function () {
+    showLives.innerHTML = "Masz " + lives + " zyć";
+    if (lives < 1) {
+      showLives.innerHTML = "Koniec gry";
+    }
+    for (var i = 0; i < geusses.length; i++) {
+      if (counter + space === geusses.length) {
+        showLives.innerHTML = "Wygrałeś!";
+      }
+    }
+  }
+
+      // rysowania człowieczka, jego dwie rąk, dwie nogi, glową i ciało
+	var animate = function () {
+    var drawMe = lives ;
+    drawArray[drawMe]();
+  }
+
+  canvas =  function(){
+
+    myStickman = document.getElementById("stickman");
+    context = myStickman.getContext('2d');
+    context.beginPath();
+    context.strokeStyle = "#fff";
+    context.lineWidth = 2;
+  };
+  
+    head = function(){
+      context.arc(60, 25, 10, 0, Math.PI*2, true);
+      context.stroke();
+    }
+    
+  draw = function($pathFromx, $pathFromy, $pathTox, $pathToy) {
+    
+    context.moveTo($pathFromx, $pathFromy);
+    context.lineTo($pathTox, $pathToy);
+    context.stroke(); 
+}
+
+  
+   torso = function() {
+     draw (60, 36, 60, 70);
+   };
+  
+   rightArm = function() {
+     draw (60, 46, 100, 50);
+   };
+  
+   leftArm = function() {
+     draw (60, 46, 20, 50);
+   };
+  
+   rightLeg = function() {
+     draw (60, 70, 100, 100);
+   };
+  
+   leftLeg = function() {
+     draw (60, 70, 20, 100);
+   };
+  
+  drawArray = [rightLeg, leftLeg, rightArm, leftArm,  torso,  head]; 
+
+
+   check = function () {
+    list.onclick = function () {
+      var geuss = (this.innerHTML);
+      this.setAttribute("class", "active");
+      this.onclick = null;
+      for (var i = 0; i < word.length; i++) {
+        if (word[i] === geuss) {
+          geusses[i].innerHTML = geuss;
+          counter += 1;
+        } 
+      }
+      var j = (word.indexOf(geuss));
+      if (j === -1) {
+        lives -= 1;
+        comments();
+        animate();
+      } else {
+        comments();
+      }
+    }
+  }
+  
+    
+  // losowania slowa
+  play = function () {
+	//categories = ["austria","chorwacja","czechy","dania","holandia","niemcy","serbia","kosowo","kongo","afganistan","angola","armenia"];
+	//nie wiem co potrzebno zrobić, żeby pracowało
+	$.ajax({
+	type: "GET",
+	url: "kaktus.xml",
+	dataType: "xml",
+	
+	success: function(xml){
+		$('gra',xml).each(function(){
+			categories=($(this).find('kraj').attr('id'));
+			//categories=$('kraj');
+			
+			});
+			}
+			}); 
+			
+			word = categories[Math.floor(Math.random() * categories.length)];
+			console.log(word);
+			buttons();
+
+    geusses = [ ];
+    lives = 6;
+    counter = 0;
+    space = 0;
+    result();
+    comments();
+    canvas();
+  };
+
+  play();
+
+   // Zagraj ponownie i wyczyscenia ekranu(czlowieczka)
+
+  document.getElementById('reset').onclick = function() {
+    correct.parentNode.removeChild(correct);
+    letters.parentNode.removeChild(letters);
+    context.clearRect(0, 0, 400, 400);
+    play();
+  }
+}
+		</script>
+  </head>
+  <body>
+   <h1>KAKTUS</h1>
+    <p>Użyj poniższego alfabetu, aby odgadnąć słowo </p>
+    <div id="buttons">
+    </div>  
+    <p id="catagoryName"></p>
+    <div id="hold">
+    </div>
+    <p id="mylives"></p> 
+    <canvas id="stickman"></canvas>
+    <div class="container">
+      <button id="reset">Zagraj ponownie</button>
+    </div>
+  </body>
+  </html>
+  
